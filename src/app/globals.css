@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Core System */
+  --color-app-bg: #080B10;
+  --color-app-surface: #0F141C;
+  --color-app-surface2: #151B24;
+  --color-app-border: #242B36;
+
+  /* Text */
+  --color-primary-text: #F8FAFC;
+  --color-secondary-text: #94A3B8;
+  --color-muted-text: #64748B;
+
+  /* Accent */
+  --color-accent: #8B5CF6;
+  --color-accent-hover: #7C3AED;
+
+  /* Feedback/Statuses */
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #38BDF8;
+
+  /* Opportunity Scoring */
+  --color-score-exceptional: #22C55E;
+  --color-score-strong: #22C55E;
+  --color-score-promising: #F59E0B;
+  --color-score-risky: #ea580c;
+  --color-score-avoid: #EF4444;
+}
+
+/* Base application styling */
+:root {
+  background-color: var(--color-app-bg);
+  color: var(--color-primary-text);
+  color-scheme: dark;
+}
+
+/* Optional: Custom scrollbar that matches the theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-app-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-app-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-app-surface2);
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { authService } from '@/services/auth.service'; 
 
 interface UserPayload {
@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserPayload | null>(null);
   const [expiredMessage, setExpiredMessage] = useState<string | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -62,6 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   }, [router]);
 
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      if (pathname === '/' || pathname === '/login') {
+        router.replace('/dashboard');
+      }
+    }
+  }, [isAuthenticated, isLoading, pathname, router]);
+
   const loginWithTokens = (access: string, refresh: string) => {
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
@@ -88,7 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, isLoading, user, loginWithTokens, logout }}>
-      {/* Dynamic Expiration Toast Notification */}
       {expiredMessage && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-app-surface border border-warning/30 text-warning px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4">
           <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>

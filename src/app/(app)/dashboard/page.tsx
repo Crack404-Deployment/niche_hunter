@@ -17,7 +17,7 @@ function getTimeAgo(dateString: string) {
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
-  
+
   if (seconds < 60) return "Just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
@@ -25,14 +25,14 @@ function getTimeAgo(dateString: string) {
   if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
-  
+
   return date.toLocaleDateString();
 }
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
@@ -43,7 +43,7 @@ export default function DashboardPage() {
     saved: 0,
   });
 
-  const firstName = user?.email 
+  const firstName = user?.email
     ? user.email.split('@')[0].replace(/[0-9]/g, '').charAt(0).toUpperCase() + user.email.split('@')[0].replace(/[0-9]/g, '').slice(1)
     : 'Developer';
 
@@ -53,7 +53,7 @@ export default function DashboardPage() {
         setLoading(true);
         const jobs = await researchService.getResearchHistory();
         const completedJobs = jobs.filter(j => j.status === 'COMPLETED');
-        
+
         const scoresData = await Promise.all(
           completedJobs.map(async (job) => {
             try {
@@ -75,7 +75,7 @@ export default function DashboardPage() {
         validScores.forEach(({ job, score }) => {
           if (score.overall_score >= 80) strongCount++;
           if (score.trend_score >= 70) risingCount++;
-          
+
           recent.push({
             id: job.id,
             title: job.query,
@@ -133,7 +133,7 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-6 py-12 md:py-16 space-y-16">
-      
+
       {/* SECTION 1: Greeting & Primary Action (Search) */}
       <section className="flex flex-col items-center text-center space-y-6">
         <div className="px-4">
@@ -146,25 +146,33 @@ export default function DashboardPage() {
         </div>
 
         <div className="w-full max-w-3xl relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-accent/30 to-info/30 rounded-2xl blur-lg opacity-40 group-focus-within:opacity-100 transition duration-500"></div>
-          <div className="relative flex items-center bg-app-surface border border-app-border rounded-xl shadow-2xl p-2 focus-within:border-accent/60 transition-colors">
-            <div className="pl-2 sm:pl-4 pr-2 text-muted-text shrink-0">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <div className="absolute -inset-1 bg-gradient-to-r from-accent/30 to-info/30 rounded-2xl blur-lg opacity-40 group-hover:opacity-100 transition duration-500"></div>
+
+          <div className="relative flex items-center bg-app-surface border border-app-border rounded-xl shadow-2xl p-2 hover:border-accent/60 transition-colors">
+
+            <div className="pl-2 sm:pl-4 pr-2 text-accent shrink-0">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
             </div>
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleQuickSearch}
-              placeholder="Enter niche, keyword, or competitor URL..." 
-              className="flex-grow w-full min-w-0 bg-transparent border-none text-primary-text text-base sm:text-lg px-2 py-2 sm:py-3 focus:outline-none placeholder:text-muted-text font-mono"
-            />
-            <Link 
-              href="/research/new" 
-              className="bg-accent hover:bg-accent-hover text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] shrink-0 text-sm sm:text-base"
+
+            <div className="flex-grow w-full min-w-0 bg-transparent border-none px-2 py-2 sm:py-3 flex flex-col justify-center">
+              <span className="text-primary-text font-bold text-sm sm:text-lg leading-tight">
+                Validate your next software idea
+              </span>
+              <span className="text-muted-text text-xs sm:text-sm hidden sm:block mt-0.5">
+                Run an automated telemetry audit on any market niche.
+              </span>
+            </div>
+
+            <Link
+              href="/research/new"
+              className="bg-accent hover:bg-accent-hover text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-bold transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] shrink-0 text-sm sm:text-base whitespace-nowrap flex items-center gap-2"
             >
-              Analyze
+              Start Research
+              <svg className="w-4 h-4 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
             </Link>
+
           </div>
         </div>
       </section>
@@ -173,12 +181,12 @@ export default function DashboardPage() {
       <section>
         <h2 className="text-sm font-bold text-muted-text uppercase tracking-widest mb-4">Telemetry Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          
+
           <div className="bg-app-surface border border-app-border rounded-xl p-5 hover:border-app-border/80 transition-colors">
             <div className="text-muted-text text-xs font-mono mb-2">Total Researches</div>
             <div className="text-3xl font-black text-primary-text">{stats.total}</div>
           </div>
-          
+
           <div className="bg-app-surface border border-app-border rounded-xl p-5 hover:border-green-500/40 transition-colors relative overflow-hidden">
             <div className="absolute -right-4 -top-4 w-16 h-16 bg-green-500/10 rounded-full blur-xl"></div>
             <div className="text-muted-text text-xs font-mono mb-2">Strong Opportunities</div>
@@ -192,7 +200,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-app-surface border border-app-border rounded-xl p-5 hover:border-accent/40 transition-colors relative overflow-hidden">
-             <div className="absolute -right-4 -top-4 w-16 h-16 bg-accent/10 rounded-full blur-xl"></div>
+            <div className="absolute -right-4 -top-4 w-16 h-16 bg-accent/10 rounded-full blur-xl"></div>
             <div className="text-muted-text text-xs font-mono mb-2">Completed Ideas</div>
             <div className="text-3xl font-black text-primary-text">{stats.saved}</div>
           </div>
@@ -208,13 +216,13 @@ export default function DashboardPage() {
             VIEW_ALL →
           </Link>
         </div>
-        
+
         {recentJobs.length > 0 ? (
           <div className="bg-app-surface border border-app-border rounded-xl overflow-hidden">
             <div className="divide-y divide-app-border/50">
               {recentJobs.map((job) => {
                 const theme = getScoreTheme(job.score);
-                
+
                 return (
                   <Link href={`/research/${job.id}/overview`} key={job.id} className="flex items-center justify-between p-4 hover:bg-app-surface2 transition-colors group gap-4">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -243,8 +251,8 @@ export default function DashboardPage() {
         ) : (
           <div className="py-12 text-center border border-dashed border-app-border rounded-xl bg-app-surface">
             <p className="text-secondary-text font-mono mb-4">No completed intelligence reports found.</p>
-            <Link 
-              href="/research/new" 
+            <Link
+              href="/research/new"
               className="inline-block bg-app-surface2 border border-app-border hover:border-accent text-primary-text px-4 py-2 rounded-lg transition-colors text-sm font-bold"
             >
               Start Your First Scan

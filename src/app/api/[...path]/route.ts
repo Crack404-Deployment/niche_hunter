@@ -1,50 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Update the type signature to expect a Promise for params
-async function proxyRequest(
-  req: NextRequest, 
-  context: { params: Promise<{ path: string[] }> }
-) {
-  // 1. Construct the secure backend URL using the hidden env variable
+// We removed the 'context' parameter entirely, which fixes the Vercel build issues
+async function proxyRequest(req: NextRequest) {
   const backendBaseUrl = process.env.BACKEND_API_URL;
   
   if (!backendBaseUrl) {
     return NextResponse.json({ error: 'Server misconfiguration: Backend URL missing' }, { status: 500 });
   }
 
-  // 2. Await the params object (Required for Next.js 15+)
-  const resolvedParams = await context.params;
+  // 1. Get the exact path requested (This safely preserves the trailing slash for Django!)
+  // Example: "/api/users/auth/google/" becomes "/users/auth/google/"
+  const pathPart = req.nextUrl.pathname.replace(/^\/api/, '');
   
-  // Join the path array (e.g., ['research', 'history'] becomes 'research/history')
-  const path = resolvedParams.path.join('/');
   const searchParams = req.nextUrl.searchParams.toString();
   const queryString = searchParams ? `?${searchParams}` : '';
   
-  const targetUrl = `${backendBaseUrl}/${path}${queryString}`;
+  // Clean the backend URL just in case it has an accidental trailing slash in .env
+  const baseUrlCleaned = backendBaseUrl.replace(/\/$/, '');
+  
+  // The final URL sent to Django
+  const targetUrl = `${baseUrlCleaned}${pathPart}${queryString}`;
 
-  // 3. Clone headers from the frontend request (this passes your JWT tokens forward)
+  // 2. Clone headers from the frontend request (passes JWT tokens forward)
   const headers = new Headers(req.headers);
   headers.delete('host'); // Remove host to prevent SSL/routing errors on Railway
   headers.delete('referer');
 
   try {
-    // 4. Extract the body if it's a POST/PUT/PATCH request
+    // 3. Extract the body if it's a POST/PUT/PATCH request
     let body;
     if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
       body = await req.text();
     }
 
-    // 5. Forward the request to the Django backend
+    // 4. Forward the request to the Django backend
     const backendResponse = await fetch(targetUrl, {
       method: req.method,
       headers,
       body,
-      redirect: 'manual',
+      redirect: 'manual', // Do not automatically follow redirects
     });
 
     const responseText = await backendResponse.text();
 
-    // 6. Send the exact Django response back to the Next.js frontend
+    // 5. Send the exact Django response back to the Next.js frontend
     return new NextResponse(responseText, {
       status: backendResponse.status,
       headers: {
